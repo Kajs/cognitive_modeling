@@ -18,13 +18,18 @@ testNumber = "01"
 window_w = 800
 window_h = 600
 letters = None
-exposureDurationMax = 0.1
+exposureDurationMax = 1.0
 exposureDurationMin = 0.01
-exposureDuration = exposureDurationMax
+exposureDurations = []
+for i in range(0, len(imagePaths)/(imagesToShow*2)):
+    exposureDurations.append(exposureDurationMax - i * (exposureDurationMax - exposureDurationMin)/((len(imagePaths))/(imagesToShow*2.0)))
+r.shuffle(exposureDurations)
+exposureDurationPos = 0
+print exposureDurations
 imagesShown = 0
 global currentImage
 currentImage = 0
-imagesToShow = 4
+imagesToShow = 2
 updateInterval = 1
 
 global lettes
@@ -63,6 +68,7 @@ def reset():
     global currentImage
     global imagePaths
     global imagesShown
+    global exposureDurationPos
     
     answerAge = ""
     answerGender = ""
@@ -70,25 +76,13 @@ def reset():
     answerIsFamous = ""
     displayMode = "img"
     letters = ""
-    updateExposureDuration()
-    currentImage += 1
-    if(currentImage == len(imagePaths)):
-        displayMode = "finished"
-
-
-def updateExposureDuration():
-    global imagesToShow
-    global imagesShown
-    global exposureDuration
-    global exposureDurationStep
     imagesShown += 1
     if(imagesShown == imagesToShow * 2):
-        length = 0.0
-        length += len(imagePaths)
+        exposureDurationPos += 1
         imagesShown = 0
-        exposureDuration -= (exposureDurationMax - exposureDurationMin)/math.ceil(length/imagesToShow)
-    
-        
+    currentImage += 1
+    if(currentImage == len(imagePaths)):
+        displayMode = "finished"            
 
 validLetters = [
 key.A, key.B, key.C,
@@ -274,7 +268,7 @@ def on_draw():
             startTime = time.time()
         img.draw()
         t = time.time()
-        if t - startTime > exposureDuration:
+        if t - startTime > exposureDurations[exposureDurationPos]:
             displayMode = 'text'
             textMode = 'isFamous'
             displayModeInitial = True  
@@ -283,6 +277,7 @@ def on_draw():
             displayModeInitial = False
             if (textMode == 'isFamous'):
                 answerText = "Is the person famous?"
+                answerText += "\n\n exposureDuration: " + str(exposureDurations[exposureDurationPos]) + ", imagePos: " + str(imageSequence[currentImage])
                 answerText += "\n\nPress Y for YES and N for NO.\n\nYour answer: "
             elif(textMode == 'gender'):
                 answerText = "Estimate gender on a scale of 1 to 9.\n\n 1 is very male.\n 9 is very female.\n\n Your answer: "
@@ -354,7 +349,7 @@ def writeAnswers():
         writer = csv.writer(f)
         if(os.stat('data/data.csv').st_size == 0):
             writer.writerow(['test_id', 'famous', 'gender', 'age', 'proof', 'exposure_duration'])
-        writer.writerow([testNumber, answerIsFamous, answerGender, answerAge, answerProof, exposureDuration])
+        writer.writerow([testNumber, answerIsFamous, answerGender, answerAge, answerProof, exposureDurations[exposureDurationPos]])
         f.close()
         
 
