@@ -348,8 +348,14 @@ def writeAnswers():
     with open('data/data.csv', 'a') as f:
         writer = csv.writer(f)
         if(os.stat('data/data.csv').st_size == 0):
-            writer.writerow(['test_id', 'famous', 'gender', 'age', 'proof', 'exposure_duration'])
-        writer.writerow([testNumber, answerIsFamous, answerGender, answerAge, answerProof, exposureDurations[exposureDurationPos]])
+            writer.writerow(['test_id', 'famous', 'gender', 'age', 'proof', 'exposure_duration', 'image_name'])
+        imagePath = imagePaths[imageSequence[currentImage]]
+        imagePathSub = None;
+        if(imageSequence[currentImage] < len(imagePaths)/2):
+            imagePathSub = imagePath[len(famousPath):]
+        else:
+            imagePathSub = imagePath[len(notFamousPath):]
+        writer.writerow([testNumber, answerIsFamous, answerGender, answerAge, answerProof, exposureDurations[exposureDurationPos], imagePathSub])
         f.close()
         
 
