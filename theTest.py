@@ -4,13 +4,14 @@ Created on Thu Nov 03 09:22:29 2016
 
 @author: nezer
 """
-import pyglet 
+import pyglet
 import csv
-from pyglet.window import key 
+from pyglet.window import key
 import time
 import os
 import random as r
 import math
+import dircache
 
 global testNumber
 testNumber = "01"
@@ -51,7 +52,7 @@ global answerGender
 global answerProof
 global answerIsFamous
 global writer
-    
+
 def reset():
     global answerAge
     global answerGender
@@ -63,7 +64,7 @@ def reset():
     global imagePaths
     global imagesShown
     global exposureDurationPos
-    
+
     answerAge = ""
     answerGender = ""
     answerProof = ""
@@ -76,7 +77,7 @@ def reset():
         imagesShown = 0
     currentImage += 1
     if(currentImage == len(imagePaths)):
-        displayMode = "finished"            
+        displayMode = "finished"
 
 validLetters = [
 key.A, key.B, key.C,
@@ -202,7 +203,7 @@ while len(imageSequence) < len(imagePaths):
             if(i not in imageSequence):
                 imageSequence.append(i)
                 remainingNotFamousImages -= 1
-                
+
 exposureDurations = []
 for i in range(0, len(imagePaths)/(imagesToShow*2)):
     exposureDurations.append(exposureDurationMax - i * (exposureDurationMax - exposureDurationMin)/((len(imagePaths))/(imagesToShow*2.0)))
@@ -212,8 +213,8 @@ exposureDurationPos = 0
 validBool = [key.Y, key.N]
 
 
-def center_image(image): 
-    image.anchor_x = image.width/2 
+def center_image(image):
+    image.anchor_x = image.width/2
     image.anchor_y = image.height/2
 def getCenteredSprite():
     path = imagePaths[imageSequence[currentImage]]
@@ -221,7 +222,12 @@ def getCenteredSprite():
     center_image(i)
     sprite = pyglet.sprite.Sprite(i, window_w/2, window_h/2)
     return sprite
-    
+def getRandomImage():
+    image = r.choice(os.listdir('images/random'))
+    i = pyglet.image.load('images/random/' + image)
+    center_image(i)
+    sprite = pyglet.sprite.Sprite(i, window_w/2, window_h/2)
+    return sprite
 def makeLabel(text, pos_x, pos_y, f_size):
 
     label = pyglet.text.Label(text,
@@ -237,8 +243,8 @@ def makeLabel(text, pos_x, pos_y, f_size):
 window = pyglet.window.Window(window_w, window_h)
 keys = key.KeyStateHandler()
 window.push_handlers(keys)
-                
-@window.event 
+
+@window.event
 def on_draw():
     global letters
     global newImage
@@ -269,11 +275,14 @@ def on_draw():
         img.draw()
         t = time.time()
         if t - startTime > exposureDurations[exposureDurationPos]:
+            img = getRandomImage()
+            img.draw()
             displayMode = 'text'
             textMode = 'isFamous'
-            displayModeInitial = True  
+            displayModeInitial = True
     elif(displayMode == 'text'):
         if(displayModeInitial):
+            time.sleep(1)
             displayModeInitial = False
             if (textMode == 'isFamous'):
                 answerText = "Is the person famous?"
@@ -291,7 +300,7 @@ def on_draw():
         label = makeLabel("You have reached the end of the test, thank you for participating!", window_w/2, window_h/2, fontSize)
         label.draw()
 
-        
+
 @window.event
 def on_key_press(symbol, modifiers):
     pass
@@ -302,12 +311,12 @@ def on_key_release(symbol, modifiers):
     global displayModeInitial
     global pressedKey
     global textMode
-    
+
     global answerAge
     global answerGender
     global answerProof
     global answerIsFamous
-    
+
     if symbol == key.BACKSPACE and len(letters) > 0:
         letters = letters[:-1]
     elif symbol == modeSwitchKey and displayMode == 'intro':
@@ -343,25 +352,18 @@ def on_key_release(symbol, modifiers):
             letters = str(unichr(symbol))
         elif (textMode == "isFamous" and symbol in validBool):
             letters = str(unichr(symbol))
-            
+
 def writeAnswers():
     with open('data/data.csv', 'a') as f:
         writer = csv.writer(f)
         if(os.stat('data/data.csv').st_size == 0):
-            writer.writerow(['test_id', 'famous', 'gender', 'age', 'proof', 'exposure_duration', 'image_name'])
-        imagePath = imagePaths[imageSequence[currentImage]]
-        imagePathSub = None;
-        if(imageSequence[currentImage] < len(imagePaths)/2):
-            imagePathSub = imagePath[len(famousPath):]
-        else:
-            imagePathSub = imagePath[len(notFamousPath):]
-        writer.writerow([testNumber, answerIsFamous, answerGender, answerAge, answerProof, exposureDurations[exposureDurationPos], imagePathSub])
+            writer.writerow(['test_id', 'famous', 'gender', 'age', 'proof', 'exposure_duration'])
+        writer.writerow([testNumber, answerIsFamous, answerGender, answerAge, answerProof, exposureDurations[exposureDurationPos]])
         f.close()
-        
+
 
 def scheduledWork(value):
     return value
-    
+
 pyglet.clock.schedule_interval(scheduledWork, 0.1)
 pyglet.app.run()
- 
