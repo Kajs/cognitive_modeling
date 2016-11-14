@@ -20,12 +20,6 @@ window_h = 600
 letters = None
 exposureDurationMax = 1.0
 exposureDurationMin = 0.01
-exposureDurations = []
-for i in range(0, len(imagePaths)/(imagesToShow*2)):
-    exposureDurations.append(exposureDurationMax - i * (exposureDurationMax - exposureDurationMin)/((len(imagePaths))/(imagesToShow*2.0)))
-r.shuffle(exposureDurations)
-exposureDurationPos = 0
-print exposureDurations
 imagesShown = 0
 global currentImage
 currentImage = 0
@@ -208,6 +202,12 @@ while len(imageSequence) < len(imagePaths):
             if(i not in imageSequence):
                 imageSequence.append(i)
                 remainingNotFamousImages -= 1
+                
+exposureDurations = []
+for i in range(0, len(imagePaths)/(imagesToShow*2)):
+    exposureDurations.append(exposureDurationMax - i * (exposureDurationMax - exposureDurationMin)/((len(imagePaths))/(imagesToShow*2.0)))
+r.shuffle(exposureDurations)
+exposureDurationPos = 0
 
 validBool = [key.Y, key.N]
 
