@@ -70,7 +70,6 @@ def reset():
     displayMode = "img"
     letters = ""
     updateExposureDuration()
-    imagesShown += 1
     currentImage += 1
     if(currentImage == len(imagePaths)):
         displayMode = "finished"
