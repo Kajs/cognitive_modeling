@@ -18,10 +18,11 @@ testNumber = "01"
 window_w = 800
 window_h = 600
 letters = None
-exposureDurationMax = 1.0
-exposureDurationMin = 0.1
+exposureDurationMax = 0.1
+exposureDurationMin = 0.01
 exposureDuration = exposureDurationMax
 imagesShown = 0
+global currentImage
 currentImage = 0
 imagesToShow = 4
 updateInterval = 1
@@ -81,7 +82,7 @@ def updateExposureDuration():
     global exposureDuration
     global exposureDurationStep
     imagesShown += 1
-    if(imagesShown == imagesToShow):
+    if(imagesShown == imagesToShow * 2):
         length = 0.0
         length += len(imagePaths)
         imagesShown = 0
@@ -194,13 +195,25 @@ notFamousPath + "SylvesterStlookAlike.jpg"
 ]
 
 imageSequence = []
+remainingFamousImages = imagesToShow
+remainingNotFamousImages = imagesToShow
 while len(imageSequence) < len(imagePaths):
-    i = r.randint(0, len(imagePaths) - 1)
-    if i not in imageSequence:
-        imageSequence.append(i)
-
-global currentImage
-currentImage = 0
+    if(remainingFamousImages == 0 and remainingNotFamousImages == 0):
+        remainingFamousImages = imagesToShow
+        remainingNotFamousImages = imagesToShow
+    i = 0
+    if(r.random() <= 0.5):
+        if(remainingFamousImages > 0):
+            i = r.randint(0, len(imagePaths)/2 - 1)
+            if(i not in imageSequence):
+                imageSequence.append(i)
+                remainingFamousImages -= 1
+    else:
+        if(remainingNotFamousImages > 0):
+            i = r.randint(len(imagePaths)/2, len(imagePaths) - 1)
+            if(i not in imageSequence):
+                imageSequence.append(i)
+                remainingNotFamousImages -= 1
 
 validBool = [key.Y, key.N]
 
@@ -243,7 +256,6 @@ def on_draw():
     global answerText
     global displayModeInitial
     global textMode
-    
     window.clear()
     if(displayMode == 'intro'):
         introText = 'A series of faces, some of which are famous will be displayed.'
