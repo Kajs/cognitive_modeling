@@ -13,7 +13,7 @@ import random as r
 import math
 
 global testNumber
-testNumber = "01"
+testNumber = "02"
 
 window_w = 800
 window_h = 600
@@ -409,7 +409,7 @@ def on_key_release(symbol, modifiers):
                 textMode = "age"
             elif textMode == "age":
                 answerAge = letters
-                if answerIsFamous == "h":
+                if answerIsFamous == "j":
                     answerProof = "blank"
                     writeAnswers()
                     reset()
@@ -427,8 +427,6 @@ def on_key_release(symbol, modifiers):
         elif (textMode == "age" and symbol in validNumbers and len(letters) < 3):
             letters += str(unichr(symbol))
         elif (textMode == "gender" and symbol in validNumbers):
-            letters = str(unichr(symbol))
-        elif (textMode == "isFamous" and symbol in validBool):
             letters = str(unichr(symbol))
             
 def writeAnswers():
