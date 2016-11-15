@@ -25,6 +25,7 @@ global currentImage
 currentImage = 0
 imagesToShow = 2
 updateInterval = 1
+measuredResponseTime = 0
 
 global lettes
 global pressedKey
@@ -268,17 +269,17 @@ def on_draw():
             startTime = time.time()
         img.draw()
         t = time.time()
-        if t - startTime > exposureDurations[exposureDurationPos]:
-            displayMode = 'text'
-            textMode = 'isFamous'
-            displayModeInitial = True  
+        #if t - startTime > exposureDurations[exposureDurationPos]:
+        #    displayMode = 'text'
+        #    textMode = 'isFamous'
+        #    displayModeInitial = True  
     elif(displayMode == 'text'):
         if(displayModeInitial):
             displayModeInitial = False
             if (textMode == 'isFamous'):
                 answerText = "Is the person famous?"
                 answerText += "\n\n exposureDuration: " + str(exposureDurations[exposureDurationPos]) + ", imagePos: " + str(imageSequence[currentImage])
-                answerText += "\n\nPress Y for YES and N for NO.\n\nYour answer: "
+                answerText += "\n\nPress F for YES and H for NO.\n\nYour answer: "
             elif(textMode == 'gender'):
                 answerText = "Estimate gender on a scale of 1 to 9.\n\n 1 is very male.\n 9 is very female.\n\n Your answer: "
             elif(textMode == 'age'):
@@ -294,7 +295,18 @@ def on_draw():
         
 @window.event
 def on_key_press(symbol, modifiers):
-    pass
+    global measuredResponseTime
+    global answerIsFamous
+    global displayMode
+    global textMode
+    global displayModeInitial
+    if((symbol == key.F or symbol == key.H) and ((displayMode == "text" and textMode == "isFamous") or displayMode == "img")):
+        measuredResponseTime = time.time() - startTime
+        answerIsFamous = letters
+        print "hello"
+        displayMode = "text"
+        textMode = "gender"
+        displayModeInitial = True  
 @window.event
 def on_key_release(symbol, modifiers):
     global letters
@@ -307,17 +319,16 @@ def on_key_release(symbol, modifiers):
     global answerGender
     global answerProof
     global answerIsFamous
-    
+    global measuredResponseTime
+    global startTime
+        
     if symbol == key.BACKSPACE and len(letters) > 0:
         letters = letters[:-1]
     elif symbol == modeSwitchKey and displayMode == 'intro':
         displayMode = 'img'
     elif symbol == modeSwitchKey and len(letters) > 0:
         if(displayMode == "text"):
-            if(textMode == "isFamous"):
-                answerIsFamous = letters
-                textMode = "gender"
-            elif(textMode == "gender"):
+            if(textMode == "gender"):
                 answerGender = letters
                 textMode = "age"
             elif textMode == "age":
@@ -348,14 +359,14 @@ def writeAnswers():
     with open('data/data.csv', 'a') as f:
         writer = csv.writer(f)
         if(os.stat('data/data.csv').st_size == 0):
-            writer.writerow(['test_id', 'famous', 'gender', 'age', 'proof', 'exposure_duration', 'image_name'])
+            writer.writerow(['test_id', 'famous', 'gender', 'age', 'proof', 'exposure_duration', 'image_name', 'response_time'])
         imagePath = imagePaths[imageSequence[currentImage]]
         imagePathSub = None;
         if(imageSequence[currentImage] < len(imagePaths)/2):
             imagePathSub = imagePath[len(famousPath):]
         else:
             imagePathSub = imagePath[len(notFamousPath):]
-        writer.writerow([testNumber, answerIsFamous, answerGender, answerAge, answerProof, exposureDurations[exposureDurationPos], imagePathSub])
+        writer.writerow([testNumber, answerIsFamous, answerGender, answerAge, answerProof, exposureDurations[exposureDurationPos], imagePathSub, measuredResponseTime])
         f.close()
         
 
