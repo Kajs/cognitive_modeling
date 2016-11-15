@@ -42,7 +42,7 @@ global displayMode
 global displayModeInitial
 global textMode
 global imgMode
-displayMode = 'intro'
+displayMode = 'intro1'
 imgMode = "priming"
 displayModeInitial = True
 modeSwitchKey = key.ENTER
@@ -285,14 +285,22 @@ def on_draw():
     global imgMode
     
     window.clear()
-    if(displayMode == 'intro'):
-        introText = 'A series of faces, some of which are famous will be displayed.'
-        introText += ' Your task is to identify which are famous and which are not.'
-        introText += '\n Please also try and guess the persons age and gender.'
-        introText += '\n\n If you think a person is famous, provide the name.'
-        introText += ' If you can\'t remember the name, please tell from where you '
-        introText += 'know the person (like the name of a movie etc).'
-        introText += '\n\n On all screens, press ENTER to continue.'
+    if(displayMode == 'intro1'):
+        introText = "Introduction page 1 of 2\n\n"
+        introText += '    A series of faces, some of which are famous will be displayed. Your task is to identify who is famous and who is not.'
+        introText += '\n\n    For each image you must decide quickly if you think the person is famous using the F and J keys.'
+        introText += '\n\nPress ENTER to continue.'
+        textOnDisplay = makeLabel(introText, window_w/2, window_h/2, 20);
+        textOnDisplay.draw()
+    elif(displayMode == 'intro2'):
+        introText = "Introduction page 2 of 2\n\n"
+        introText += '    You need to make the famous/not famous decision fast.'
+        introText += ' A BIG exclamation mark (!) will appear for ' + str(primingTime)
+        introText += ' second(s).'
+        introText += '\n\n    Next comes the image, followed by an unrelated random image.'
+        introText += '\n\nYou can press F for famous or J for not famous.'
+        introText += ' IMPORTANT: you do not need to wait for the image to disappear when you anwer.'
+        introText += '\n\nPress ENTER to continue.'
         textOnDisplay = makeLabel(introText, window_w/2, window_h/2, 20);
         textOnDisplay.draw()
     elif(displayMode == 'img' and imgMode == "priming"):
@@ -335,13 +343,19 @@ def on_draw():
             if (textMode == 'isFamous'):
                 answerText = "Is the person famous?"
                 answerText += "\n\n exposureDuration: " + str(exposureDurations[exposureDurationPos]) + ", imagePos: " + str(imageSequence[currentImage])
-                answerText += "\n\nPress F for famous and H for not famous."
+                answerText += "\n\nPress F for famous or J for not famous."
             elif(textMode == 'gender'):
-                answerText = "Estimate gender on a scale of 1 to 9.\n\n 1 is very male.\n 9 is very female.\n\n Your answer: "
+                answerText = "      Estimate gender on a scale of 1 to 9:\n\n"
+                answerText += "       1           3           5           7           9"
+                answerText += "\n\nvery male             middle           very female"
+                answerText += '\n\n\nUse number keys to answer and ENTER to proceed.'
+                answerText += "\n                       Your answer: "
+                answerText += letters
             elif(textMode == 'age'):
-                answerText = "Estimate the persons age: "
+                answerText = "User number keys to answer and ENTER to proceed.\n\n"
+                answerText += "Estimate the persons age: "
             elif(textMode == 'proof'):
-                answerText = "Please enter the persons name. If you can't remember the name, try and provide specific information related to the person (like the name of a movie they starred in).\n\n Your answer: "
+                answerText = "Please enter the persons name.\n\n    If you can't remember the name, try and provide specific information related to the person (like the name of a movie they starred in).\n\n Your answer: "
         label = makeLabel(answerText + letters, window_w/2, window_h/2, fontSize)
         label.draw()
     elif(displayMode == 'finished'):
@@ -358,12 +372,12 @@ def on_key_press(symbol, modifiers):
     global displayModeInitial
     global imgMode
     
-    if((symbol == key.F or symbol == key.H) and ((displayMode == "text" and textMode == "isFamous") or ((displayMode == "img") and (imgMode != "priming")))):
+    if((symbol == key.F or symbol == key.J) and ((displayMode == "text" and textMode == "isFamous") or ((displayMode == "img") and (imgMode != "priming")))):
         measuredResponseTime = time.time() - startTime
         if(symbol == key.F):
             answerIsFamous = "f"
-        if(symbol == key.H):
-            answerIsFamous = "h"
+        if(symbol == key.J):
+            answerIsFamous = "j"
         displayMode = "text"
         textMode = "gender"
         displayModeInitial = True  
@@ -384,7 +398,9 @@ def on_key_release(symbol, modifiers):
         
     if symbol == key.BACKSPACE and len(letters) > 0:
         letters = letters[:-1]
-    elif symbol == modeSwitchKey and displayMode == 'intro':
+    elif symbol == modeSwitchKey and displayMode == 'intro1':
+        displayMode = "intro2"
+    elif symbol == modeSwitchKey and displayMode == 'intro2':
         displayMode = 'img'
     elif symbol == modeSwitchKey and len(letters) > 0:
         if(displayMode == "text"):
