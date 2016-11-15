@@ -18,8 +18,9 @@ testNumber = "02"
 window_w = 800
 window_h = 600
 letters = None
-exposureDurationMax = 0.5
-exposureDurationMin = 0.01
+exposureDurationMult = 1.0/60.0
+exposureDurationMax = exposureDurationMult * 20
+exposureDurationMin = exposureDurationMult * 1
 imagesShown = 0
 global currentImage
 currentImage = 0
@@ -37,6 +38,7 @@ fontSize = 20
 
 global textOnDisplay
 global img
+global imgRandom
 
 global displayMode
 global displayModeInitial
@@ -47,6 +49,10 @@ imgMode = "priming"
 displayModeInitial = True
 modeSwitchKey = key.ENTER
 primingTime = 2.5
+famousKey = "F"
+notFamousKey = "J"
+global isFamousAnswered
+isFamousAnswered = False
 
 global startTime
 
@@ -68,11 +74,13 @@ def reset():
     global imagesShown
     global exposureDurationPos
     global imgMode
+    global isFamousAnswered
     
     answerAge = ""
     answerGender = ""
     answerProof = ""
     answerIsFamous = ""
+    isFamousAnswered = False
     displayMode = "img"
     imgMode = "priming"
     letters = ""
@@ -185,6 +193,7 @@ for i in range(0, len(imagePaths)/(imagesToShow*2)):
     exposureDurations.append(exposureDurationMax - i * (exposureDurationMax - exposureDurationMin)/((len(imagePaths))/(imagesToShow*2.0)))
 r.shuffle(exposureDurations)
 exposureDurationPos = 0
+print exposureDurations
 
 validBool = [key.Y, key.N]
 
@@ -230,16 +239,18 @@ def on_draw():
     global showIntroduction
     global textOnDisplay
     global img
+    global imgRandom
     global answerText
     global displayModeInitial
     global textMode
     global imgMode
+    global isFamousAnswered
     
     window.clear()
     if(displayMode == 'intro1'):
         introText = "Introduction page 1 of 2\n\n"
         introText += '    A series of faces, some of which are famous will be displayed. Your task is to identify who is famous and who is not.'
-        introText += '\n\n    For each image you must decide quickly if you think the person is famous using the F and J keys.'
+        introText += '\n\n    For each image you must decide quickly if you think the person is famous using the ' + famousKey + ' and ' + notFamousKey + ' keys.'
         introText += '\n\nPress ENTER to continue.'
         textOnDisplay = makeLabel(introText, window_w/2, window_h/2, 20);
         textOnDisplay.draw()
@@ -249,7 +260,7 @@ def on_draw():
         introText += ' A BIG exclamation mark (!) will appear for ' + str(primingTime)
         introText += ' second(s).'
         introText += '\n\n    Next comes the image, followed by an unrelated random image.'
-        introText += '\n\nYou can press F for famous or J for not famous.'
+        introText += '\n\nYou can press ' + famousKey + ' for famous or ' + notFamousKey + ' for not famous.'
         introText += ' IMPORTANT: you do not need to wait for the image to disappear when you anwer.'
         introText += '\n\nPress ENTER to continue.'
         textOnDisplay = makeLabel(introText, window_w/2, window_h/2, 20);
@@ -272,19 +283,16 @@ def on_draw():
         if(displayModeInitial):
             displayModeInitial = False
             img = getCenteredSprite()
+            imgRandom = getRandomImage()
             startTime = time.time()
         img.draw()
         t = time.time()
         if (t - startTime > exposureDurations[exposureDurationPos]):
             imgMode = "random"
-            displayModeInitial = True
     elif(displayMode == 'img' and imgMode == "random"):
-        if(displayModeInitial):
-            displayModeInitial = False
-            img = getRandomImage()
-        img.draw()
+        imgRandom.draw()
         t = time.time()
-        if (t - startTime > exposureDurations[exposureDurationPos] + 1):
+        if (t - startTime > exposureDurations[exposureDurationPos] + 2):
             displayMode = "text"
             textMode = "isFamous"
             displayModeInitial = True
@@ -293,8 +301,11 @@ def on_draw():
             displayModeInitial = False
             if (textMode == 'isFamous'):
                 answerText = "Is the person famous?"
-                answerText += "\n\n exposureDuration: " + str(exposureDurations[exposureDurationPos]) + ", imagePos: " + str(imageSequence[currentImage])
-                answerText += "\n\nPress F for famous or J for not famous."
+                #answerText += "\n\n exposureDuration: " + str(exposureDurations[exposureDurationPos]) + ", imagePos: " + str(imageSequence[currentImage])
+                answerText += "\n\nPress " + famousKey + ' for famous or ' + notFamousKey + ' for not famous.'
+                if(isFamousAnswered):
+                    textMode = "gender"
+                    displayModeInitial = True
             elif(textMode == 'gender'):
                 answerText = "      Estimate gender on a scale of 1 to 9:\n\n"
                 answerText += "       1           3           5           7           9"
@@ -309,6 +320,7 @@ def on_draw():
                 answerText = "Please enter the persons name.\n\n    If you can't remember the name, try and provide specific information related to the person (like the name of a movie they starred in).\n\n Your answer: "
         label = makeLabel(answerText + letters, window_w/2, window_h/2, fontSize)
         label.draw()
+        
     elif(displayMode == 'finished'):
         label = makeLabel("You have reached the end of the test, thank you for participating!", window_w/2, window_h/2, fontSize)
         label.draw()
@@ -322,16 +334,19 @@ def on_key_press(symbol, modifiers):
     global textMode
     global displayModeInitial
     global imgMode
+    global isFamousAnswered
     
     if((symbol == key.F or symbol == key.J) and ((displayMode == "text" and textMode == "isFamous") or ((displayMode == "img") and (imgMode != "priming")))):
         measuredResponseTime = time.time() - startTime
         if(symbol == key.F):
-            answerIsFamous = "f"
+            answerIsFamous = famousKey
         if(symbol == key.J):
-            answerIsFamous = "j"
-        displayMode = "text"
-        textMode = "gender"
-        displayModeInitial = True  
+            answerIsFamous = notFamousKey
+        isFamousAnswered = True
+        if(imgMode == "normal"):
+            imgMode = "random"
+        if(displayMode == "text" and textMode == "isFamous"):
+            displayModeInitial = True
 @window.event
 def on_key_release(symbol, modifiers):
     global letters
@@ -398,6 +413,6 @@ def writeAnswers():
 def scheduledWork(value):
     return value
     
-pyglet.clock.schedule_interval(scheduledWork, 0.1)
+pyglet.clock.schedule_interval(scheduledWork, 0.0001)
 pyglet.app.run()
  
