@@ -42,7 +42,7 @@ global displayMode
 global displayModeInitial
 global textMode
 global imgMode
-displayMode = 'intro1
+displayMode = 'intro'
 imgMode = "priming"
 displayModeInitial = True
 modeSwitchKey = key.ENTER
