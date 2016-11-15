@@ -18,7 +18,7 @@ testNumber = "01"
 window_w = 800
 window_h = 600
 letters = None
-exposureDurationMax = 1.0
+exposureDurationMax = 0.5
 exposureDurationMin = 0.01
 imagesShown = 0
 global currentImage
@@ -41,9 +41,12 @@ global img
 global displayMode
 global displayModeInitial
 global textMode
-displayMode = 'intro'
+global imgMode
+displayMode = 'intro1
+imgMode = "priming"
 displayModeInitial = True
 modeSwitchKey = key.ENTER
+primingTime = 1
 
 global startTime
 
@@ -64,12 +67,14 @@ def reset():
     global imagePaths
     global imagesShown
     global exposureDurationPos
+    global imgMode
     
     answerAge = ""
     answerGender = ""
     answerProof = ""
     answerIsFamous = ""
     displayMode = "img"
+    imgMode = "priming"
     letters = ""
     imagesShown += 1
     if(imagesShown == imagesToShow * 2):
@@ -183,6 +188,26 @@ notFamousPath + "StylistlookAlike.jpg",
 notFamousPath + "SylvesterStlookAlike.jpg"
 ]
 
+randomPath = "images/random/"
+imagePathsRandom = [
+randomPath + "download.jpeg",
+randomPath + "365165-800x600.jpg",
+randomPath + "470668-800x600.jpg",
+randomPath + "1000732.jpg",
+randomPath + "1015661.jpg",
+randomPath + "1099140.jpg",
+randomPath + "AAEAAQAAAAAAAAWfAAAAJDcwZWVjMzIyLWIxODItNDA0Ny05MTBlLTNiMmU5OTU4ODIyNA.jpg",
+randomPath + "AAEAAQAAAAAAAAZWAAAAJDVlZGI1ODUzLWRjNTMtNDg5Yy1hZDBiLTRjYTIyOGNiZTVjMg.jpg",
+randomPath + "dreamstime_s_32258676.jpg",
+randomPath + "iStock_000063177421_Small.jpg",
+randomPath + "placeimg_800_600_any.jpg",
+randomPath + "placeimg_800_600_any (1).jpg",
+randomPath + "placeimg_800_600_any (2).jpg",
+randomPath + "placeimg_800_600_any (3).jpg",
+randomPath + "placeimg_800_600_any (4).jpg",
+randomPath + "rocks-along-river_thumb[1].jpg"
+]
+
 imageSequence = []
 remainingFamousImages = imagesToShow
 remainingNotFamousImages = imagesToShow
@@ -222,6 +247,12 @@ def getCenteredSprite():
     center_image(i)
     sprite = pyglet.sprite.Sprite(i, window_w/2, window_h/2)
     return sprite
+def getRandomImage():
+    path = imagePathsRandom[r.randint(0, len(imagePathsRandom) - 1)]
+    i = pyglet.image.load(path)
+    center_image(i)
+    sprite = pyglet.sprite.Sprite(i, window_w/2, window_h/2)
+    return sprite
     
 def makeLabel(text, pos_x, pos_y, f_size):
 
@@ -251,6 +282,8 @@ def on_draw():
     global answerText
     global displayModeInitial
     global textMode
+    global imgMode
+    
     window.clear()
     if(displayMode == 'intro'):
         introText = 'A series of faces, some of which are famous will be displayed.'
@@ -262,24 +295,47 @@ def on_draw():
         introText += '\n\n On all screens, press ENTER to continue.'
         textOnDisplay = makeLabel(introText, window_w/2, window_h/2, 20);
         textOnDisplay.draw()
-    elif(displayMode == 'img'):
+    elif(displayMode == 'img' and imgMode == "priming"):
+        if(displayModeInitial):
+            displayModeInitial = False
+            startTime = time.time()
+        w = 0.0
+        h = 0.0
+        w += window_w
+        h += window_h
+        textOnDisplay = makeLabel("!", w/1.25, h/2, 120);
+        textOnDisplay.draw()
+        t = time.time()
+        if(t - startTime > primingTime):
+            imgMode = "normal"
+            displayModeInitial = True
+    elif(displayMode == 'img' and imgMode == "normal"):
         if(displayModeInitial):
             displayModeInitial = False
             img = getCenteredSprite()
             startTime = time.time()
         img.draw()
         t = time.time()
-        #if t - startTime > exposureDurations[exposureDurationPos]:
-        #    displayMode = 'text'
-        #    textMode = 'isFamous'
-        #    displayModeInitial = True  
+        if (t - startTime > exposureDurations[exposureDurationPos]):
+            imgMode = "random"
+            displayModeInitial = True
+    elif(displayMode == 'img' and imgMode == "random"):
+        if(displayModeInitial):
+            displayModeInitial = False
+            img = getRandomImage()
+        img.draw()
+        t = time.time()
+        if (t - startTime > exposureDurations[exposureDurationPos] + 1):
+            displayMode = "text"
+            textMode = "isFamous"
+            displayModeInitial = True
     elif(displayMode == 'text'):
         if(displayModeInitial):
             displayModeInitial = False
             if (textMode == 'isFamous'):
                 answerText = "Is the person famous?"
                 answerText += "\n\n exposureDuration: " + str(exposureDurations[exposureDurationPos]) + ", imagePos: " + str(imageSequence[currentImage])
-                answerText += "\n\nPress F for YES and H for NO.\n\nYour answer: "
+                answerText += "\n\nPress F for famous and H for not famous."
             elif(textMode == 'gender'):
                 answerText = "Estimate gender on a scale of 1 to 9.\n\n 1 is very male.\n 9 is very female.\n\n Your answer: "
             elif(textMode == 'age'):
@@ -300,10 +356,14 @@ def on_key_press(symbol, modifiers):
     global displayMode
     global textMode
     global displayModeInitial
-    if((symbol == key.F or symbol == key.H) and ((displayMode == "text" and textMode == "isFamous") or displayMode == "img")):
+    global imgMode
+    
+    if((symbol == key.F or symbol == key.H) and ((displayMode == "text" and textMode == "isFamous") or ((displayMode == "img") and (imgMode != "priming")))):
         measuredResponseTime = time.time() - startTime
-        answerIsFamous = letters
-        print "hello"
+        if(symbol == key.F):
+            answerIsFamous = "f"
+        if(symbol == key.H):
+            answerIsFamous = "h"
         displayMode = "text"
         textMode = "gender"
         displayModeInitial = True  
@@ -333,7 +393,7 @@ def on_key_release(symbol, modifiers):
                 textMode = "age"
             elif textMode == "age":
                 answerAge = letters
-                if answerIsFamous == "n":
+                if answerIsFamous == "h":
                     answerProof = "blank"
                     writeAnswers()
                     reset()
@@ -346,7 +406,7 @@ def on_key_release(symbol, modifiers):
             letters = ""
         displayModeInitial = True
     elif displayMode == "text":
-        if textMode == "proof" and symbol in validLetters:
+        if textMode == "proof" and (symbol in validLetters or symbol in validNumbers):
             letters += str(unichr(symbol))
         elif (textMode == "age" and symbol in validNumbers and len(letters) < 3):
             letters += str(unichr(symbol))

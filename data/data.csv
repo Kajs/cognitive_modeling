@@ -1,0 +1,8 @@
+test_id,famous,gender,age,proof,exposure_duration,image_name,response_time
+01,,4,34,lsdf,0.15700000000000003,RihannaLookAlike.jpg,0.437000036239624
+01,,3,34,sdflkj,0.15700000000000003,Miley Cyrus.jpg,0.6549999713897705
+01,f,3,34,lksjdf,0.27949999999999997,KlookAlike.jpg,0.21800017356872559
+01,h,2,23,blank,0.27949999999999997,ModelNotFamousLookAlike.jpg,0.24899983406066895
+01,f,9,30,nicole kidman,0.27949999999999997,Nicole Kidman.jpg,2.9809999465942383
+01,f,1,23,justin bieber,0.20600000000000002,Justin Bieber.jpg,0.9360001087188721
+01,h,9,34,blank,0.15700000000000003,StylistlookAlike.jpg,2.6519999504089355
