@@ -49,8 +49,8 @@ imgMode = "priming"
 displayModeInitial = True
 modeSwitchKey = key.ENTER
 primingTime = 2.5
-famousKey = "F"
-notFamousKey = "J"
+famousKey = "Y"
+notFamousKey = "N"
 global isFamousAnswered
 isFamousAnswered = False
 
@@ -193,7 +193,6 @@ for i in range(0, len(imagePaths)/(imagesToShow*2)):
     exposureDurations.append(exposureDurationMax - i * (exposureDurationMax - exposureDurationMin)/((len(imagePaths))/(imagesToShow*2.0)))
 r.shuffle(exposureDurations)
 exposureDurationPos = 0
-print exposureDurations
 
 validBool = [key.Y, key.N]
 
@@ -336,11 +335,11 @@ def on_key_press(symbol, modifiers):
     global imgMode
     global isFamousAnswered
     
-    if((symbol == key.F or symbol == key.J) and ((displayMode == "text" and textMode == "isFamous") or ((displayMode == "img") and (imgMode != "priming")))):
+    if((symbol in validBool) and ((displayMode == "text" and textMode == "isFamous") or ((displayMode == "img") and (imgMode != "priming")))):
         measuredResponseTime = time.time() - startTime
-        if(symbol == key.F):
+        if(symbol == validBool[0]):
             answerIsFamous = famousKey
-        if(symbol == key.J):
+        if(symbol == validBool[1]):
             answerIsFamous = notFamousKey
         isFamousAnswered = True
         if(imgMode == "normal"):
@@ -375,7 +374,9 @@ def on_key_release(symbol, modifiers):
                 textMode = "age"
             elif textMode == "age":
                 answerAge = letters
-                if answerIsFamous == "j":
+                print answerIsFamous
+                if answerIsFamous == notFamousKey:
+                    print "hello"
                     answerProof = "blank"
                     writeAnswers()
                     reset()
