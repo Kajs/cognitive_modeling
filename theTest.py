@@ -15,7 +15,7 @@ from PIL import ImageFilter
 from PIL import ImageEnhance
 
 global testNumber
-testNumber = "03"
+testNumber = "01"
 
 window_w = 800
 window_h = 600
@@ -258,6 +258,7 @@ def on_draw():
     global textMode
     global imgMode
     global isFamousAnswered
+    global answerIsFamous
     
     window.clear()
     if(displayMode == 'intro1'):
@@ -304,10 +305,12 @@ def on_draw():
     elif(displayMode == 'img' and imgMode == "random"):
         imgRandom.draw()
         t = time.time()
-        if (t - startTime > exposureDurations[exposureDurationPos] + 2):
+        if (t - startTime > 2 - exposureDurations[exposureDurationPos]):
             displayMode = "text"
-            textMode = "isFamous"
+            textMode = "gender"
             displayModeInitial = True
+            if(not isFamousAnswered):
+                answerIsFamous = "U"
     elif(displayMode == 'text'):
         if(displayModeInitial):
             displayModeInitial = False
@@ -329,7 +332,7 @@ def on_draw():
                 answerText = "User number keys to answer and ENTER to proceed.\n\n"
                 answerText += "Estimate the persons age: "
             elif(textMode == 'proof'):
-                answerText = "Please enter the persons name.\n\n    If you can't remember the name, try and provide specific information related to the person (like the name of a movie they starred in).\n\n Your answer: "
+                answerText = "Please enter the persons name.\n\n    If you can't remember the name, try and provide specific information related to the person (like the name of a movie they starred in).\n\n    If you do not know, please write 'not sure' or similar.\n\n Your answer: "
         label = makeLabel(answerText + letters, window_w/2, window_h/2, fontSize)
         label.draw()
         
