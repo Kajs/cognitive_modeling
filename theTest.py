@@ -421,7 +421,7 @@ def writeAnswers():
             imagePathSub = imagePath[len(famousPath):]
         else:
             imagePathSub = imagePath[len(notFamousPath):]
-        #writer.writerow([testNumber, answerIsFamous, answerGender, answerAge, answerProof, exposureDurations[exposureDurationPos], imagePathSub, measuredResponseTime])
+        writer.writerow([testNumber, answerIsFamous, answerGender, answerAge, answerProof, exposureDurations[exposureDurationPos], imagePathSub, measuredResponseTime])
         f.close()
         
 
