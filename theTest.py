@@ -143,11 +143,11 @@ notFamousPath + "NotFamousW3.png",
 notFamousPath + "NotFamousW4.png",
 notFamousPath + "NotFamousW5.png",
 notFamousPath + "DavidBlookAlike.jpg",
-notFamousPath + "NotFamouse.jpg",
+notFamousPath + "KlookAlike.jpg",
 notFamousPath + "NotFamousLookAlike.jpg",
-notFamousPath + "BritneySpearslookAlike.jpg",
-notFamousPath + "JimCareylookAlike.jpg",
-notFamousPath + "RihannaLookAlike.jpg"
+notFamousPath + "NotSoFamouse.jpg",
+notFamousPath + "maleNotFamouse.jpg",
+notFamousPath + "StylistlookAlike.jpg"
 ]
 
 randomPath = "images/random/"
@@ -356,8 +356,6 @@ def on_key_press(symbol, modifiers):
         if(symbol == validBool[1]):
             answerIsFamous = notFamousKey
         isFamousAnswered = True
-        if(imgMode == "normal"):
-            imgMode = "random"
         if(displayMode == "text" and textMode == "isFamous"):
             displayModeInitial = True
 @window.event
