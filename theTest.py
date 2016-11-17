@@ -23,7 +23,7 @@ window_h = 600
 letters = None
 exposureDurationMult = 1.0/60.0
 exposureDurationMax = exposureDurationMult * 20
-exposureDurationMin = exposureDurationMult * 20
+exposureDurationMin = exposureDurationMult * 1
 imagesShown = 0
 global currentImage
 currentImage = 0
