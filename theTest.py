@@ -11,16 +11,19 @@ import time
 import os
 import random as r
 import math
+from PIL import Image
+from PIL import ImageFilter
+from PIL import ImageEnhance
 
 global testNumber
-testNumber = "02"
+testNumber = "03"
 
 window_w = 800
 window_h = 600
 letters = None
 exposureDurationMult = 1.0/60.0
 exposureDurationMax = exposureDurationMult * 20
-exposureDurationMin = exposureDurationMult * 1
+exposureDurationMin = exposureDurationMult * 20
 imagesShown = 0
 global currentImage
 currentImage = 0
@@ -167,6 +170,8 @@ randomPath + "placeimg_800_600_any (4).jpg",
 randomPath + "rocks-along-river_thumb[1].jpg"
 ]
 
+blurSuffix = "_BLUR.jpg"
+
 imageSequence = []
 remainingFamousImages = imagesToShow
 remainingNotFamousImages = imagesToShow
@@ -202,7 +207,8 @@ def center_image(image):
     image.anchor_y = image.height/2
 def getCenteredSprite():
     path = imagePaths[imageSequence[currentImage]]
-    i = pyglet.image.load(path)
+    makeBlurredImage()
+    i = pyglet.image.load(path[:-4] + blurSuffix)
     center_image(i)
     sprite = pyglet.sprite.Sprite(i, window_w/2, window_h/2)
     return sprite
@@ -212,6 +218,15 @@ def getRandomImage():
     center_image(i)
     sprite = pyglet.sprite.Sprite(i, window_w/2, window_h/2)
     return sprite
+    
+def makeBlurredImage():
+    path = imagePaths[imageSequence[currentImage]]
+    img = Image.open(path)
+    converter = ImageEnhance.Color(img)
+    img2 = converter.enhance(0.0)
+    blurred_image = img2.filter(ImageFilter.GaussianBlur(5))
+    pathNoExtension = path[:-4]
+    blurred_image.save(pathNoExtension + blurSuffix)
     
 def makeLabel(text, pos_x, pos_y, f_size):
 
@@ -249,19 +264,18 @@ def on_draw():
     if(displayMode == 'intro1'):
         introText = "Introduction page 1 of 2\n\n"
         introText += '    A series of faces, some of which are famous will be displayed. Your task is to identify who is famous and who is not.'
-        introText += '\n\n    For each image you must decide quickly if you think the person is famous using the ' + famousKey + ' and ' + notFamousKey + ' keys.'
         introText += '\n\nPress ENTER to continue.'
         textOnDisplay = makeLabel(introText, window_w/2, window_h/2, 20);
         textOnDisplay.draw()
     elif(displayMode == 'intro2'):
         introText = "Introduction page 2 of 2\n\n"
-        introText += '    You need to make the famous/not famous decision fast.'
-        introText += ' A BIG exclamation mark (!) will appear for ' + str(primingTime)
+        introText += '    You need to make the famous/not famous decision fast using ' + famousKey
+        introText += ' for YES to famous or ' + notFamousKey + ' for NO to famous.'
+        introText += '\n\n Before the image is shown, a BIG exclamation mark (!) will appear for ' + str(primingTime)
         introText += ' second(s).'
-        introText += '\n\n    Next comes the image, followed by an unrelated random image.'
-        introText += '\n\nYou can press ' + famousKey + ' for famous or ' + notFamousKey + ' for not famous.'
-        introText += ' IMPORTANT: you do not need to wait for the image to disappear when you anwer.'
-        introText += '\n\nPress ENTER to continue.'
+
+        introText += '\n\n IMPORTANT: you do not need to wait for the image to disappear when you anwer.'
+        introText += '\n\n Please place your fingers on ' + famousKey + ' and ' + notFamousKey + ' and press ENTER to continue.'
         textOnDisplay = makeLabel(introText, window_w/2, window_h/2, 20);
         textOnDisplay.draw()
     elif(displayMode == 'img' and imgMode == "priming"):
@@ -407,7 +421,7 @@ def writeAnswers():
             imagePathSub = imagePath[len(famousPath):]
         else:
             imagePathSub = imagePath[len(notFamousPath):]
-        writer.writerow([testNumber, answerIsFamous, answerGender, answerAge, answerProof, exposureDurations[exposureDurationPos], imagePathSub, measuredResponseTime])
+        #writer.writerow([testNumber, answerIsFamous, answerGender, answerAge, answerProof, exposureDurations[exposureDurationPos], imagePathSub, measuredResponseTime])
         f.close()
         
 
