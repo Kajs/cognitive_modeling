@@ -10,7 +10,6 @@ from pyglet.window import key
 import time
 import os
 import random as r
-import math
 from PIL import Image
 from PIL import ImageFilter
 from PIL import ImageEnhance
@@ -386,9 +385,7 @@ def on_key_release(symbol, modifiers):
                 textMode = "age"
             elif textMode == "age":
                 answerAge = letters
-                print answerIsFamous
                 if answerIsFamous == notFamousKey:
-                    print "hello"
                     answerProof = "blank"
                     writeAnswers()
                     reset()
