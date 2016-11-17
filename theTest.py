@@ -4,28 +4,29 @@ Created on Thu Nov 03 09:22:29 2016
 
 @author: nezer
 """
-import pyglet
+import pyglet 
 import csv
-from pyglet.window import key
+from pyglet.window import key 
 import time
 import os
 import random as r
 import math
-import dircache
 
 global testNumber
-testNumber = "01"
+testNumber = "02"
 
 window_w = 800
 window_h = 600
 letters = None
-exposureDurationMax = 1.0
-exposureDurationMin = 0.01
+exposureDurationMult = 1.0/60.0
+exposureDurationMax = exposureDurationMult * 20
+exposureDurationMin = exposureDurationMult * 1
 imagesShown = 0
 global currentImage
 currentImage = 0
 imagesToShow = 2
 updateInterval = 1
+measuredResponseTime = 0
 
 global lettes
 global pressedKey
@@ -37,13 +38,21 @@ fontSize = 20
 
 global textOnDisplay
 global img
+global imgRandom
 
 global displayMode
 global displayModeInitial
 global textMode
-displayMode = 'intro'
+global imgMode
+displayMode = 'intro1'
+imgMode = "priming"
 displayModeInitial = True
 modeSwitchKey = key.ENTER
+primingTime = 2.5
+famousKey = "Y"
+notFamousKey = "N"
+global isFamousAnswered
+isFamousAnswered = False
 
 global startTime
 
@@ -52,7 +61,7 @@ global answerGender
 global answerProof
 global answerIsFamous
 global writer
-
+    
 def reset():
     global answerAge
     global answerGender
@@ -64,12 +73,16 @@ def reset():
     global imagePaths
     global imagesShown
     global exposureDurationPos
-
+    global imgMode
+    global isFamousAnswered
+    
     answerAge = ""
     answerGender = ""
     answerProof = ""
     answerIsFamous = ""
+    isFamousAnswered = False
     displayMode = "img"
+    imgMode = "priming"
     letters = ""
     imagesShown += 1
     if(imagesShown == imagesToShow * 2):
@@ -77,7 +90,7 @@ def reset():
         imagesShown = 0
     currentImage += 1
     if(currentImage == len(imagePaths)):
-        displayMode = "finished"
+        displayMode = "finished"            
 
 validLetters = [
 key.A, key.B, key.C,
@@ -100,87 +113,58 @@ key._9]
 famousPath = "images/famous/"
 notFamousPath = "images/not_famous/"
 imagePaths = [
-famousPath + "50 cent.jpg",
-famousPath + "Adolf Hitler.jpg",
 famousPath + "Albert Einstein.jpg",
-famousPath + "Angelina Jolie.jpg",
-famousPath + "Arnold Swarzenegger.jpg",
 famousPath + "Barack Obama.jpg",
-famousPath + "Beyonce Knowles.jpg",
-famousPath + "Bill Clinton.jpg",
-famousPath + "Bill Gates.jpg",
-famousPath + "Britney Spears.jpg",
-famousPath + "Cameron Diaz.jpg",
-famousPath + "Cher.jpg",
-famousPath + "Christina Aguilera.jpg",
-famousPath + "Donald Trump.jpg",
-famousPath + "Dronning Margrethe.jpg",
-famousPath + "Dr Phil.jpg",
-famousPath + "Elvis Presley.jpg",
-famousPath + "Eminem.jpg",
-famousPath + "George W. Bush.jpg",
-famousPath + "Hillary Clinton.jpg",
-famousPath + "Jennifer Aniston.jpg",
-famousPath + "Jennifer Lopez.jpg",
-famousPath + "Jim Carrey.jpg",
-famousPath + "Justin Bieber.jpg",
-famousPath + "Kim Kardashian.jpg",
-famousPath + "Lady Gaga.jpg",
-famousPath + "Leonardo DeCaprio.jpg",
-famousPath + "Madonna Louise.jpg",
-famousPath + "Marylin Monroe.jpg",
 famousPath + "Michael Jackson.jpg",
-famousPath + "Michelle Obama.jpg",
-famousPath + "Miley Cyrus.jpg",
-famousPath + "Nicole Kidman.jpg",
-famousPath + "Oprah Winfrey.jpg",
-famousPath + "Pamela Anderson.jpg",
-famousPath + "Shakira.jpg",
 famousPath + "Steve Jobs.jpg",
-famousPath + "Tom Cruise.jpg",
-famousPath + "Vladimir Putin.jpg",
-famousPath + "DUPLICATE.jpg",
-notFamousPath + "AngelinaJolielookAlike.jpg",
-notFamousPath + "BradPittlookAlike.jpg",
-notFamousPath + "BritneySpearslookAlike.jpg",
+famousPath + "Elvis Presley.jpg",
+famousPath + "Donald Trump.jpg",
+famousPath + "Justin Bieber.jpg",
+famousPath + "Jim Carrey.jpg",
+famousPath + "Miley Cyrus.jpg",
+famousPath + "Jennifer Aniston.jpg",
+famousPath + "Michelle Obama.jpg",
+famousPath + "Beyonce Knowles.jpg",
+famousPath + "Dronning Margrethe.jpg",
+famousPath + "Angelina Jolie.jpg",
+famousPath + "Oprah Winfrey.jpg",
+famousPath + "Britney Spears.jpg",
+notFamousPath + "NotFamousM1.png",
+notFamousPath + "NotFamousM2.png",
+notFamousPath + "NotFamousM3.png",
+notFamousPath + "NotFamousM4.png",
+notFamousPath + "NotFamousM5.png",
+notFamousPath + "NotFamousW1.png",
+notFamousPath + "NotFamousW2.png",
+notFamousPath + "NotFamousW3.png",
+notFamousPath + "NotFamousW4.png",
+notFamousPath + "NotFamousW5.png",
 notFamousPath + "DavidBlookAlike.jpg",
-notFamousPath + "JimCareylookAlike.jpg",
-notFamousPath + "KimKardashianlookAlike.jpg",
-notFamousPath + "KimKlookAlike.jpg",
-notFamousPath + "KlookAlike.jpg",
-notFamousPath + "LeonardoDiCapookAlike.jpg",
-notFamousPath + "maleNo1tFamouse.jpg",
-notFamousPath + "maleNotFamouse.jpg",
-notFamousPath + "Max GreenfieldLookAlike.jpg",
-notFamousPath + "ModelNotFamousLookAlike.jpg",
 notFamousPath + "NotFamouse.jpg",
 notFamousPath + "NotFamousLookAlike.jpg",
-notFamousPath + "NotSoFamouse.jpg",
-notFamousPath + "NotSsoFamouse.jpg",
-notFamousPath + "RihannaLookAlike.jpg",
-notFamousPath + "StylistlookAlike.jpg",
-notFamousPath + "SylvesterStlookAlike.jpg",
+notFamousPath + "BritneySpearslookAlike.jpg",
+notFamousPath + "JimCareylookAlike.jpg",
+notFamousPath + "RihannaLookAlike.jpg"
+]
 
-notFamousPath + "AngelinaJolielookAlike.jpg",
-notFamousPath + "BradPittlookAlike.jpg",
-notFamousPath + "BritneySpearslookAlike.jpg",
-notFamousPath + "DavidBlookAlike.jpg",
-notFamousPath + "JimCareylookAlike.jpg",
-notFamousPath + "KimKardashianlookAlike.jpg",
-notFamousPath + "KimKlookAlike.jpg",
-notFamousPath + "KlookAlike.jpg",
-notFamousPath + "LeonardoDiCapookAlike.jpg",
-notFamousPath + "maleNo1tFamouse.jpg",
-notFamousPath + "maleNotFamouse.jpg",
-notFamousPath + "Max GreenfieldLookAlike.jpg",
-notFamousPath + "ModelNotFamousLookAlike.jpg",
-notFamousPath + "NotFamouse.jpg",
-notFamousPath + "NotFamousLookAlike.jpg",
-notFamousPath + "NotSoFamouse.jpg",
-notFamousPath + "NotSsoFamouse.jpg",
-notFamousPath + "RihannaLookAlike.jpg",
-notFamousPath + "StylistlookAlike.jpg",
-notFamousPath + "SylvesterStlookAlike.jpg"
+randomPath = "images/random/"
+imagePathsRandom = [
+randomPath + "download.jpeg",
+randomPath + "365165-800x600.jpg",
+randomPath + "470668-800x600.jpg",
+randomPath + "1000732.jpg",
+randomPath + "1015661.jpg",
+randomPath + "1099140.jpg",
+randomPath + "AAEAAQAAAAAAAAWfAAAAJDcwZWVjMzIyLWIxODItNDA0Ny05MTBlLTNiMmU5OTU4ODIyNA.jpg",
+randomPath + "AAEAAQAAAAAAAAZWAAAAJDVlZGI1ODUzLWRjNTMtNDg5Yy1hZDBiLTRjYTIyOGNiZTVjMg.jpg",
+randomPath + "dreamstime_s_32258676.jpg",
+randomPath + "iStock_000063177421_Small.jpg",
+randomPath + "placeimg_800_600_any.jpg",
+randomPath + "placeimg_800_600_any (1).jpg",
+randomPath + "placeimg_800_600_any (2).jpg",
+randomPath + "placeimg_800_600_any (3).jpg",
+randomPath + "placeimg_800_600_any (4).jpg",
+randomPath + "rocks-along-river_thumb[1].jpg"
 ]
 
 imageSequence = []
@@ -203,7 +187,7 @@ while len(imageSequence) < len(imagePaths):
             if(i not in imageSequence):
                 imageSequence.append(i)
                 remainingNotFamousImages -= 1
-
+                
 exposureDurations = []
 for i in range(0, len(imagePaths)/(imagesToShow*2)):
     exposureDurations.append(exposureDurationMax - i * (exposureDurationMax - exposureDurationMin)/((len(imagePaths))/(imagesToShow*2.0)))
@@ -213,8 +197,8 @@ exposureDurationPos = 0
 validBool = [key.Y, key.N]
 
 
-def center_image(image):
-    image.anchor_x = image.width/2
+def center_image(image): 
+    image.anchor_x = image.width/2 
     image.anchor_y = image.height/2
 def getCenteredSprite():
     path = imagePaths[imageSequence[currentImage]]
@@ -223,11 +207,12 @@ def getCenteredSprite():
     sprite = pyglet.sprite.Sprite(i, window_w/2, window_h/2)
     return sprite
 def getRandomImage():
-    image = r.choice(os.listdir('images/random'))
-    i = pyglet.image.load('images/random/' + image)
+    path = imagePathsRandom[r.randint(0, len(imagePathsRandom) - 1)]
+    i = pyglet.image.load(path)
     center_image(i)
     sprite = pyglet.sprite.Sprite(i, window_w/2, window_h/2)
     return sprite
+    
 def makeLabel(text, pos_x, pos_y, f_size):
 
     label = pyglet.text.Label(text,
@@ -243,8 +228,8 @@ def makeLabel(text, pos_x, pos_y, f_size):
 window = pyglet.window.Window(window_w, window_h)
 keys = key.KeyStateHandler()
 window.push_handlers(keys)
-
-@window.event
+                
+@window.event 
 def on_draw():
     global letters
     global newImage
@@ -253,57 +238,114 @@ def on_draw():
     global showIntroduction
     global textOnDisplay
     global img
+    global imgRandom
     global answerText
     global displayModeInitial
     global textMode
+    global imgMode
+    global isFamousAnswered
+    
     window.clear()
-    if(displayMode == 'intro'):
-        introText = 'A series of faces, some of which are famous will be displayed.'
-        introText += ' Your task is to identify which are famous and which are not.'
-        introText += '\n Please also try and guess the persons age and gender.'
-        introText += '\n\n If you think a person is famous, provide the name.'
-        introText += ' If you can\'t remember the name, please tell from where you '
-        introText += 'know the person (like the name of a movie etc).'
-        introText += '\n\n On all screens, press ENTER to continue.'
+    if(displayMode == 'intro1'):
+        introText = "Introduction page 1 of 2\n\n"
+        introText += '    A series of faces, some of which are famous will be displayed. Your task is to identify who is famous and who is not.'
+        introText += '\n\n    For each image you must decide quickly if you think the person is famous using the ' + famousKey + ' and ' + notFamousKey + ' keys.'
+        introText += '\n\nPress ENTER to continue.'
         textOnDisplay = makeLabel(introText, window_w/2, window_h/2, 20);
         textOnDisplay.draw()
-    elif(displayMode == 'img'):
+    elif(displayMode == 'intro2'):
+        introText = "Introduction page 2 of 2\n\n"
+        introText += '    You need to make the famous/not famous decision fast.'
+        introText += ' A BIG exclamation mark (!) will appear for ' + str(primingTime)
+        introText += ' second(s).'
+        introText += '\n\n    Next comes the image, followed by an unrelated random image.'
+        introText += '\n\nYou can press ' + famousKey + ' for famous or ' + notFamousKey + ' for not famous.'
+        introText += ' IMPORTANT: you do not need to wait for the image to disappear when you anwer.'
+        introText += '\n\nPress ENTER to continue.'
+        textOnDisplay = makeLabel(introText, window_w/2, window_h/2, 20);
+        textOnDisplay.draw()
+    elif(displayMode == 'img' and imgMode == "priming"):
+        if(displayModeInitial):
+            displayModeInitial = False
+            startTime = time.time()
+        w = 0.0
+        h = 0.0
+        w += window_w
+        h += window_h
+        textOnDisplay = makeLabel("!", w/1.25, h/2, 120);
+        textOnDisplay.draw()
+        t = time.time()
+        if(t - startTime > primingTime):
+            imgMode = "normal"
+            displayModeInitial = True
+    elif(displayMode == 'img' and imgMode == "normal"):
         if(displayModeInitial):
             displayModeInitial = False
             img = getCenteredSprite()
+            imgRandom = getRandomImage()
             startTime = time.time()
         img.draw()
         t = time.time()
-        if t - startTime > exposureDurations[exposureDurationPos]:
-            img = getRandomImage()
-            img.draw()
-            displayMode = 'text'
-            textMode = 'isFamous'
+        if (t - startTime > exposureDurations[exposureDurationPos]):
+            imgMode = "random"
+    elif(displayMode == 'img' and imgMode == "random"):
+        imgRandom.draw()
+        t = time.time()
+        if (t - startTime > exposureDurations[exposureDurationPos] + 2):
+            displayMode = "text"
+            textMode = "isFamous"
             displayModeInitial = True
     elif(displayMode == 'text'):
         if(displayModeInitial):
-            time.sleep(1)
             displayModeInitial = False
             if (textMode == 'isFamous'):
                 answerText = "Is the person famous?"
-                answerText += "\n\n exposureDuration: " + str(exposureDurations[exposureDurationPos]) + ", imagePos: " + str(imageSequence[currentImage])
-                answerText += "\n\nPress Y for YES and N for NO.\n\nYour answer: "
+                #answerText += "\n\n exposureDuration: " + str(exposureDurations[exposureDurationPos]) + ", imagePos: " + str(imageSequence[currentImage])
+                answerText += "\n\nPress " + famousKey + ' for famous or ' + notFamousKey + ' for not famous.'
+                if(isFamousAnswered):
+                    textMode = "gender"
+                    displayModeInitial = True
             elif(textMode == 'gender'):
-                answerText = "Estimate gender on a scale of 1 to 9.\n\n 1 is very male.\n 9 is very female.\n\n Your answer: "
+                answerText = "      Estimate gender on a scale of 1 to 9:\n\n"
+                answerText += "       1           3           5           7           9"
+                answerText += "\n\nvery male             middle           very female"
+                answerText += '\n\n\nUse number keys to answer and ENTER to proceed.'
+                answerText += "\n                       Your answer: "
+                answerText += letters
             elif(textMode == 'age'):
-                answerText = "Estimate the persons age: "
+                answerText = "User number keys to answer and ENTER to proceed.\n\n"
+                answerText += "Estimate the persons age: "
             elif(textMode == 'proof'):
-                answerText = "Please enter the persons name. If you can't remember the name, try and provide specific information related to the person (like the name of a movie they starred in).\n\n Your answer: "
+                answerText = "Please enter the persons name.\n\n    If you can't remember the name, try and provide specific information related to the person (like the name of a movie they starred in).\n\n Your answer: "
         label = makeLabel(answerText + letters, window_w/2, window_h/2, fontSize)
         label.draw()
+        
     elif(displayMode == 'finished'):
         label = makeLabel("You have reached the end of the test, thank you for participating!", window_w/2, window_h/2, fontSize)
         label.draw()
 
-
+        
 @window.event
 def on_key_press(symbol, modifiers):
-    pass
+    global measuredResponseTime
+    global answerIsFamous
+    global displayMode
+    global textMode
+    global displayModeInitial
+    global imgMode
+    global isFamousAnswered
+    
+    if((symbol in validBool) and ((displayMode == "text" and textMode == "isFamous") or ((displayMode == "img") and (imgMode != "priming")))):
+        measuredResponseTime = time.time() - startTime
+        if(symbol == validBool[0]):
+            answerIsFamous = famousKey
+        if(symbol == validBool[1]):
+            answerIsFamous = notFamousKey
+        isFamousAnswered = True
+        if(imgMode == "normal"):
+            imgMode = "random"
+        if(displayMode == "text" and textMode == "isFamous"):
+            displayModeInitial = True
 @window.event
 def on_key_release(symbol, modifiers):
     global letters
@@ -311,27 +353,30 @@ def on_key_release(symbol, modifiers):
     global displayModeInitial
     global pressedKey
     global textMode
-
+    
     global answerAge
     global answerGender
     global answerProof
     global answerIsFamous
-
+    global measuredResponseTime
+    global startTime
+        
     if symbol == key.BACKSPACE and len(letters) > 0:
         letters = letters[:-1]
-    elif symbol == modeSwitchKey and displayMode == 'intro':
+    elif symbol == modeSwitchKey and displayMode == 'intro1':
+        displayMode = "intro2"
+    elif symbol == modeSwitchKey and displayMode == 'intro2':
         displayMode = 'img'
     elif symbol == modeSwitchKey and len(letters) > 0:
         if(displayMode == "text"):
-            if(textMode == "isFamous"):
-                answerIsFamous = letters
-                textMode = "gender"
-            elif(textMode == "gender"):
+            if(textMode == "gender"):
                 answerGender = letters
                 textMode = "age"
             elif textMode == "age":
                 answerAge = letters
-                if answerIsFamous == "n":
+                print answerIsFamous
+                if answerIsFamous == notFamousKey:
+                    print "hello"
                     answerProof = "blank"
                     writeAnswers()
                     reset()
@@ -344,26 +389,31 @@ def on_key_release(symbol, modifiers):
             letters = ""
         displayModeInitial = True
     elif displayMode == "text":
-        if textMode == "proof" and symbol in validLetters:
+        if textMode == "proof" and (symbol in validLetters or symbol in validNumbers):
             letters += str(unichr(symbol))
         elif (textMode == "age" and symbol in validNumbers and len(letters) < 3):
             letters += str(unichr(symbol))
         elif (textMode == "gender" and symbol in validNumbers):
             letters = str(unichr(symbol))
-        elif (textMode == "isFamous" and symbol in validBool):
-            letters = str(unichr(symbol))
-
+            
 def writeAnswers():
     with open('data/data.csv', 'a') as f:
         writer = csv.writer(f)
         if(os.stat('data/data.csv').st_size == 0):
-            writer.writerow(['test_id', 'famous', 'gender', 'age', 'proof', 'exposure_duration'])
-        writer.writerow([testNumber, answerIsFamous, answerGender, answerAge, answerProof, exposureDurations[exposureDurationPos]])
+            writer.writerow(['test_id', 'famous', 'gender', 'age', 'proof', 'exposure_duration', 'image_name', 'response_time'])
+        imagePath = imagePaths[imageSequence[currentImage]]
+        imagePathSub = None;
+        if(imageSequence[currentImage] < len(imagePaths)/2):
+            imagePathSub = imagePath[len(famousPath):]
+        else:
+            imagePathSub = imagePath[len(notFamousPath):]
+        writer.writerow([testNumber, answerIsFamous, answerGender, answerAge, answerProof, exposureDurations[exposureDurationPos], imagePathSub, measuredResponseTime])
         f.close()
-
+        
 
 def scheduledWork(value):
     return value
-
-pyglet.clock.schedule_interval(scheduledWork, 0.1)
+    
+pyglet.clock.schedule_interval(scheduledWork, 0.0001)
 pyglet.app.run()
+ 
