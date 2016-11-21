@@ -17,12 +17,19 @@ from PIL import ImageEnhance
 global testNumber
 testNumber = "01"
 
+global contrastAmount
+global colorAmount
+global blurAmount
+contrastAmount = 0.2
+colorAmount = 0.0
+blurAmount = 5.5
+
 window_w = 800
 window_h = 600
 letters = None
 exposureDurationMult = 1.0/60.0
-exposureDurationMax = exposureDurationMult * 20
-exposureDurationMin = exposureDurationMult * 1
+exposureDurationMax = exposureDurationMult * 15
+exposureDurationMin = exposureDurationMult * 2.5
 imagesShown = 0
 global currentImage
 currentImage = 0
@@ -77,6 +84,7 @@ def reset():
     global exposureDurationPos
     global imgMode
     global isFamousAnswered
+    global measuredResponseTime
     
     answerAge = ""
     answerGender = ""
@@ -87,6 +95,7 @@ def reset():
     imgMode = "priming"
     letters = ""
     imagesShown += 1
+    measuredResponseTime = 0
     if(imagesShown == imagesToShow * 2):
         exposureDurationPos += 1
         imagesShown = 0
@@ -124,10 +133,10 @@ famousPath + "Donald Trump.jpg",
 famousPath + "Justin Bieber.jpg",
 famousPath + "Jim Carrey.jpg",
 famousPath + "Miley Cyrus.jpg",
-famousPath + "Jennifer Aniston.jpg",
+famousPath + "Christina Aguilera.jpg",
 famousPath + "Michelle Obama.jpg",
 famousPath + "Beyonce Knowles.jpg",
-famousPath + "Dronning Margrethe.jpg",
+famousPath + "Lady Gaga.jpg",
 famousPath + "Angelina Jolie.jpg",
 famousPath + "Oprah Winfrey.jpg",
 famousPath + "Britney Spears.jpg",
@@ -212,18 +221,58 @@ def getCenteredSprite():
     sprite = pyglet.sprite.Sprite(i, window_w/2, window_h/2)
     return sprite
 def getRandomImage():
+    global contrastAmount
+    global colorAmount
+    global blurAmount
+    
     path = imagePathsRandom[r.randint(0, len(imagePathsRandom) - 1)]
-    i = pyglet.image.load(path)
-    center_image(i)
-    sprite = pyglet.sprite.Sprite(i, window_w/2, window_h/2)
+    img = Image.open(path)
+    
+    converter = ImageEnhance.Color(img)
+    img = converter.enhance(colorAmount)
+    
+    blurred_image = img.filter(ImageFilter.GaussianBlur(blurAmount))
+    
+    converter = ImageEnhance.Contrast(blurred_image)
+    blurred_image = converter.enhance(contrastAmount) 
+    
+    pathNoExtension = path[:-4]
+    blurred_image.save(pathNoExtension + blurSuffix)
+    
+    img = pyglet.image.load(pathNoExtension + blurSuffix)
+    center_image(img)
+    
+    sprite = pyglet.sprite.Sprite(img, window_w/2, window_h/2)
     return sprite
     
 def makeBlurredImage():
+    global contrastAmount
+    global colorAmount
+    global blurAmount
+    
+    if True: #if you want to adjust blur/contrast and see results for all images, set to true
+        for temp in imageSequence:
+            path = imagePaths[temp]
+            img = Image.open(path)
+            converter = ImageEnhance.Color(img)
+            img = converter.enhance(colorAmount)
+            blurred_image = img.filter(ImageFilter.GaussianBlur(blurAmount))
+            converter = ImageEnhance.Contrast(blurred_image)
+            blurred_image = converter.enhance(contrastAmount)
+            pathNoExtension = path[:-4]
+            blurred_image.save(pathNoExtension + blurSuffix)
+        
     path = imagePaths[imageSequence[currentImage]]
     img = Image.open(path)
+    
     converter = ImageEnhance.Color(img)
-    img2 = converter.enhance(0.0)
-    blurred_image = img2.filter(ImageFilter.GaussianBlur(5))
+    img = converter.enhance(colorAmount)
+    
+    blurred_image = img.filter(ImageFilter.GaussianBlur(blurAmount))
+    
+    converter = ImageEnhance.Contrast(blurred_image)
+    blurred_image = converter.enhance(contrastAmount)    
+    
     pathNoExtension = path[:-4]
     blurred_image.save(pathNoExtension + blurSuffix)
     
