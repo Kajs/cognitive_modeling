@@ -250,7 +250,7 @@ def makeBlurredImage():
     global colorAmount
     global blurAmount
     
-    if True: #if you want to adjust blur/contrast and see results for all images, set to true
+    if False: #if you want to adjust blur/contrast and see results for all images, set to true
         for temp in imageSequence:
             path = imagePaths[temp]
             img = Image.open(path)
