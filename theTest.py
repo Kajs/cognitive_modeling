@@ -13,6 +13,7 @@ import random as r
 from PIL import Image
 from PIL import ImageFilter
 from PIL import ImageEnhance
+import winsound
 
 global testNumber
 testNumber = "15"
@@ -28,7 +29,7 @@ window_w = 800
 window_h = 600
 letters = None
 exposureDurationMult = 1.0/60.0
-exposureDurationMax = exposureDurationMult * 15
+exposureDurationMax = exposureDurationMult * 18
 exposureDurationMin = exposureDurationMult * 2.5
 imagesShown = 0
 global currentImage
@@ -63,6 +64,9 @@ notFamousKey = "N"
 notAnsweredInTimeKey = ["U", "U" + famousKey, "U" + notFamousKey]
 global isFamousAnswered
 isFamousAnswered = False
+
+soundPath = "sound/beep.wav"
+
 
 global startTime
 
@@ -401,6 +405,7 @@ def on_key_press(symbol, modifiers):
     global displayModeInitial
     global imgMode
     global isFamousAnswered
+    
     if((symbol in validBool) and ((displayMode == "text" and textMode == "isFamous") or ((displayMode == "img") and (imgMode != "priming")))):
         measuredResponseTime = time.time() - startTime
         if(symbol == validBool[0]):
@@ -410,6 +415,7 @@ def on_key_press(symbol, modifiers):
         isFamousAnswered = True
         if(displayMode == "text" and textMode == "isFamous"):
             displayModeInitial = True
+        winsound.PlaySound(soundPath, winsound.SND_ALIAS)
     elif((symbol in validBool and answerIsFamous in notAnsweredInTimeKey) and (displayMode == 'text' and textMode == 'gender')):
         answerIsFamous = notAnsweredInTimeKey[0] + (chr(symbol)).upper()
         measuredResponseTime = time.time() - startTime

@@ -64,6 +64,8 @@ notAnsweredInTimeKey = ["U", "U" + famousKey, "U" + notFamousKey]
 global isFamousAnswered
 isFamousAnswered = False
 
+soundPath = "sound/beep.wav"
+
 global startTime
 
 global answerAge
@@ -381,6 +383,7 @@ def on_key_press(symbol, modifiers):
         isFamousAnswered = True
         if(displayMode == "text" and textMode == "isFamous"):
             displayModeInitial = True
+        winsound.PlaySound(soundPath, winsound.SND_ALIAS)
     elif((symbol in validBool and answerIsFamous in notAnsweredInTimeKey) and (displayMode == 'text' and textMode == 'gender')):
         answerIsFamous = notAnsweredInTimeKey[0] + (chr(symbol)).upper()
         measuredResponseTime = time.time() - startTime
