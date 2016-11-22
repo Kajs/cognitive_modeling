@@ -15,7 +15,7 @@ from PIL import ImageFilter
 from PIL import ImageEnhance
 
 global testNumber
-testNumber = "01"
+testNumber = "15"
 
 global contrastAmount
 global colorAmount
@@ -60,6 +60,7 @@ modeSwitchKey = key.ENTER
 primingTime = 2.5
 famousKey = "Y"
 notFamousKey = "N"
+notAnsweredInTimeKey = ["U", "U" + famousKey, "U" + notFamousKey]
 global isFamousAnswered
 isFamousAnswered = False
 
@@ -125,6 +126,7 @@ famousPath = "images/famous/"
 notFamousPath = "images/not_famous/"
 imagePaths = [
 famousPath + "Albert Einstein.jpg",
+#amousPath + "Bill Clinton.jpg",
 famousPath + "Barack Obama.jpg",
 famousPath + "Michael Jackson.jpg",
 famousPath + "Steve Jobs.jpg",
@@ -359,7 +361,7 @@ def on_draw():
             textMode = "gender"
             displayModeInitial = True
             if(not isFamousAnswered):
-                answerIsFamous = "U"
+                answerIsFamous = notAnsweredInTimeKey[0]
     elif(displayMode == 'text'):
         if(displayModeInitial):
             displayModeInitial = False
@@ -399,7 +401,6 @@ def on_key_press(symbol, modifiers):
     global displayModeInitial
     global imgMode
     global isFamousAnswered
-    
     if((symbol in validBool) and ((displayMode == "text" and textMode == "isFamous") or ((displayMode == "img") and (imgMode != "priming")))):
         measuredResponseTime = time.time() - startTime
         if(symbol == validBool[0]):
@@ -409,6 +410,9 @@ def on_key_press(symbol, modifiers):
         isFamousAnswered = True
         if(displayMode == "text" and textMode == "isFamous"):
             displayModeInitial = True
+    elif((symbol in validBool and answerIsFamous in notAnsweredInTimeKey) and (displayMode == 'text' and textMode == 'gender')):
+        answerIsFamous = notAnsweredInTimeKey[0] + (chr(symbol)).upper()
+        measuredResponseTime = time.time() - startTime
 @window.event
 def on_key_release(symbol, modifiers):
     global letters
