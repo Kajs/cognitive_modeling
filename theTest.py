@@ -16,21 +16,22 @@ from PIL import ImageEnhance
 import winsound
 
 global testNumber
-testNumber = "15"
+testNumber = "19"
 
 global contrastAmount
 global colorAmount
 global blurAmount
-contrastAmount = 0.2
+contrastAmount = 0.5
 colorAmount = 0.0
-blurAmount = 5.5
+blurAmount = 5.0
+imageDuration = 3.0
 
 window_w = 800
 window_h = 600
 letters = None
 exposureDurationMult = 1.0/60.0
 exposureDurationMax = exposureDurationMult * 18
-exposureDurationMin = exposureDurationMult * 2.5
+exposureDurationMin = exposureDurationMult * 4
 imagesShown = 0
 global currentImage
 currentImage = 0
@@ -64,8 +65,6 @@ notFamousKey = "N"
 notAnsweredInTimeKey = ["U", "U" + famousKey, "U" + notFamousKey]
 global isFamousAnswered
 isFamousAnswered = False
-
-soundPath = "sound/beep.wav"
 
 
 global startTime
@@ -130,7 +129,6 @@ famousPath = "images/famous/"
 notFamousPath = "images/not_famous/"
 imagePaths = [
 famousPath + "Albert Einstein.jpg",
-#amousPath + "Bill Clinton.jpg",
 famousPath + "Barack Obama.jpg",
 famousPath + "Michael Jackson.jpg",
 famousPath + "Steve Jobs.jpg",
@@ -360,7 +358,7 @@ def on_draw():
     elif(displayMode == 'img' and imgMode == "random"):
         imgRandom.draw()
         t = time.time()
-        if (t - startTime > 2 - exposureDurations[exposureDurationPos]):
+        if (t - startTime > imageDuration - exposureDurations[exposureDurationPos]):
             displayMode = "text"
             textMode = "gender"
             displayModeInitial = True
@@ -415,7 +413,7 @@ def on_key_press(symbol, modifiers):
         isFamousAnswered = True
         if(displayMode == "text" and textMode == "isFamous"):
             displayModeInitial = True
-        winsound.PlaySound(soundPath, winsound.SND_ALIAS)
+        winsound.Beep(6000, 100)
     elif((symbol in validBool and answerIsFamous in notAnsweredInTimeKey) and (displayMode == 'text' and textMode == 'gender')):
         answerIsFamous = notAnsweredInTimeKey[0] + (chr(symbol)).upper()
         measuredResponseTime = time.time() - startTime
