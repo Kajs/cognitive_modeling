@@ -72,6 +72,18 @@ global answerGender
 global answerProof
 global answerIsFamous
 global writer
+
+global progressLabel
+def updateProgress():
+    global progressLabel
+    progressLabel = pyglet.text.Label("Progress: " + str(imagesShown + 1) + "/" + str(len(imagePaths)),
+                    font_name='Times New Roman',
+                    font_size=20,
+                    x=window_w/2.0, y=window_h - 20,
+                    anchor_x='center', anchor_y='center',
+                    multiline = True,
+                    width = 512)
+
     
 def reset():
     global answerAge
@@ -283,7 +295,9 @@ def on_draw():
     global imgMode
     global isFamousAnswered
     global answerIsFamous
+    global progressLabel
     
+    updateProgress()
     window.clear()
     if(displayMode == 'intro1'):
         introText = "Introduction page 1 of 2\n\n"
@@ -291,6 +305,7 @@ def on_draw():
         introText += '\n\nPress ENTER to continue.'
         textOnDisplay = makeLabel(introText, window_w/2, window_h/2, 20);
         textOnDisplay.draw()
+        progressLabel.draw()
     elif(displayMode == 'intro2'):
         introText = "Introduction page 2 of 2\n\n"
         introText += '    You need to make the famous/not famous decision fast using ' + famousKey
@@ -302,6 +317,7 @@ def on_draw():
         introText += '\n\n Please place your fingers on ' + famousKey + ' and ' + notFamousKey + ' and press ENTER to continue.'
         textOnDisplay = makeLabel(introText, window_w/2, window_h/2, 20);
         textOnDisplay.draw()
+        progressLabel.draw()
     elif(displayMode == 'img' and imgMode == "priming"):
         if(displayModeInitial):
             displayModeInitial = False
@@ -312,6 +328,7 @@ def on_draw():
         h += window_h
         textOnDisplay = makeLabel("!", w/1.25, h/2, 120);
         textOnDisplay.draw()
+        progressLabel.draw()
         t = time.time()
         if(t - startTime > primingTime):
             imgMode = "normal"
@@ -359,6 +376,7 @@ def on_draw():
                 answerText = "Please enter the persons name.\n\n    If you can't remember the name, try and provide specific information related to the person (like the name of a movie they starred in).\n\n    If you do not know, please write 'not sure' or similar.\n\n Your answer: "
         label = makeLabel(answerText + letters, window_w/2, window_h/2, fontSize)
         label.draw()
+        progressLabel.draw()
         
     elif(displayMode == 'finished'):
         label = makeLabel("You have reached the end of the test, thank you for participating!", window_w/2, window_h/2, fontSize)
