@@ -76,7 +76,7 @@ global writer
 global progressLabel
 def updateProgress():
     global progressLabel
-    progressLabel = pyglet.text.Label("Progress: " + str(imagesShown + 1) + "/" + str(len(imagePaths)),
+    progressLabel = pyglet.text.Label("Progress: " + str(currentImage + 1) + "/" + str(len(imagePaths)),
                     font_name='Times New Roman',
                     font_size=20,
                     x=window_w/2.0, y=window_h - 20,
